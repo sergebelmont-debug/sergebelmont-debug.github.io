@@ -1,0 +1,420 @@
+/* Polices hébergées sur le site (aucun appel à un service extérieur). */
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('/fonts/great-vibes-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond-latin-500-italic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Fredoka';
+  src: url('/fonts/fredoka-latin-wght-normal.woff2') format('woff2');
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+:root {
+  --paper: #efe3cc;
+  --paper-light: #f8efdc;
+  --paper-dark: #e4d3b4;
+  --ink: #3a2418;
+  --wine: #5b1a22;
+  --brown: #8a5a3a;
+  --gold: #a8743e;
+  --orange: #a35412;
+  --card: #fffaf0;
+  --line: #d9c39c;
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --script: 'Great Vibes', 'Cormorant Garamond', cursive;
+  --round: 'Fredoka', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 18px;
+  background: radial-gradient(120% 60% at 50% 0%, var(--paper-light) 0%, var(--paper) 55%, var(--paper-dark) 100%) fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--wine);
+}
+
+.page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 34px 16px 0;
+}
+
+/* ───────── En-tête : nom et disque ───────── */
+.intro {
+  display: grid;
+  grid-template-areas: "head" "record" "sub";
+  justify-items: center;
+  text-align: center;
+  row-gap: 24px;
+}
+
+.intro-head {
+  grid-area: head;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro-sub {
+  grid-area: sub;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--round);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+
+h1 {
+  margin: 4px 0 0;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(56px, 16vw, 92px);
+  line-height: 1.05;
+  color: var(--wine);
+}
+
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 18px;
+  color: var(--gold);
+}
+
+.ornament i {
+  width: 70px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.welcome {
+  margin: 0;
+  font-size: 22px;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.to-games {
+  display: none;
+}
+
+.record {
+  position: relative;
+  width: min(300px, 78vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2a2224 0%, #111 58%, #1c1718 60%, #0d0b0b 100%);
+  box-shadow: 0 20px 40px rgba(60, 30, 10, 0.35);
+  display: grid;
+  place-items: center;
+  grid-area: record;
+}
+
+.grooves {
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 5px);
+}
+
+.label {
+  position: relative;
+  width: 57%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #e9c98e;
+  animation: spin 24s linear infinite;
+}
+
+.label img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ───────── Les jeux ───────── */
+.games {
+  margin-top: 40px;
+}
+
+.games h2 {
+  margin: 0 0 16px;
+  text-align: center;
+  font-family: var(--round);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+
+.tickets {
+  display: grid;
+  gap: 16px;
+}
+
+.ticket {
+  display: flex;
+  min-height: 150px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(80, 40, 10, 0.15);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ticket:hover,
+.ticket:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(80, 40, 10, 0.22);
+}
+
+.ticket:focus-visible {
+  outline: 3px solid var(--wine);
+  outline-offset: 3px;
+}
+
+.ticket-art {
+  width: 108px;
+  flex: none;
+  padding: 10px;
+}
+
+.art-bubble {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 3px;
+  background: radial-gradient(110% 90% at 50% 0%, #6b4fb8, #2a1650);
+}
+
+.ball {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.ball.red { background: radial-gradient(circle at 35% 30%, #fff 0%, #ff5a7a 30%, #b01540 100%); }
+.ball.blue { background: radial-gradient(circle at 35% 30%, #fff 0%, #4fa3ff 30%, #1a4fb0 100%); }
+.ball.yellow { background: radial-gradient(circle at 35% 30%, #fff 0%, #ffd24a 30%, #c98a00 100%); }
+.ball.green { background: radial-gradient(circle at 35% 30%, #fff 0%, #3fd17a 30%, #137a3d 100%); }
+.ball.purple { background: radial-gradient(circle at 35% 30%, #fff 0%, #b46bff 30%, #5d1fb0 100%); }
+
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: center;
+  gap: 2px;
+  background: #f3ead8;
+  padding: 14px 10px;
+}
+
+.art-grid i {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  font-family: var(--round);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 15px;
+  background: #fff;
+  border: 1px solid #b9a88a;
+}
+
+.art-grid .clue {
+  background: #5b3a2a;
+  border-color: #5b3a2a;
+}
+
+.art-grid .hl {
+  background: #ffd66b;
+}
+
+.ticket-body {
+  flex: 1;
+  padding: 16px 16px 16px 18px;
+  border-left: 2px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-body b {
+  font-family: var(--round);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--wine);
+}
+
+.ticket-body span {
+  margin: 4px 0 10px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.ticket-body em {
+  margin-top: auto;
+  font-family: var(--round);
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--orange);
+}
+
+/* ───────── Pied de page ───────── */
+.footer {
+  margin-top: 44px;
+  padding: 26px 0 34px;
+  text-align: center;
+  border-top: 1px solid #c9a978;
+}
+
+.soon {
+  margin: 0;
+  font-size: 18px;
+  font-style: italic;
+  color: #6e4a30;
+}
+
+.copy {
+  margin: 8px 0 0;
+  font-family: var(--round);
+  font-size: 13px;
+  color: var(--brown);
+}
+
+/* ───────── Ordinateur et tablette ───────── */
+@media (min-width: 760px) {
+  .page {
+    padding: 64px 32px 0;
+  }
+
+  .intro {
+    grid-template-areas: "head record" "sub record";
+    grid-template-columns: auto 380px;
+    justify-content: center;
+    justify-items: start;
+    align-items: end;
+    text-align: left;
+    column-gap: 64px;
+    row-gap: 0;
+  }
+
+  .intro-sub {
+    align-self: start;
+  }
+
+  .intro-head,
+  .intro-sub {
+    align-items: flex-start;
+  }
+
+  .ornament {
+    margin-left: 4px;
+  }
+
+  .welcome {
+    font-size: 26px;
+  }
+
+  .to-games {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 26px;
+    padding: 12px 26px;
+    font-family: var(--round);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--paper-light);
+    text-decoration: none;
+    background: var(--wine);
+    border-radius: 26px;
+  }
+
+  .to-games:hover {
+    background: #7a2430;
+  }
+
+  .record {
+    width: 380px;
+  }
+
+  .games {
+    margin-top: 72px;
+  }
+
+  .tickets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .ticket {
+    min-height: 180px;
+  }
+
+  .ticket-art {
+    width: 140px;
+  }
+}
