@@ -294,7 +294,7 @@
           </div>
           <div class="card">
             <h2>D’où ils viennent</h2>
-            <p class="hint">« direct » = lien ouvert sans site d’origine connu.</p>
+            <p class="hint">Les applications TikTok, Facebook et Instagram n’indiquent pas toujours d’où vient le visiteur : partagez les liens avec <code>?src=</code> pour un comptage fiable.</p>
             <div id="src" class="hbars"></div>
           </div>
           <div class="card">
@@ -325,6 +325,7 @@
       const nf = new Intl.NumberFormat('fr-FR');
       const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
       const LANGS = { fr: 'Français', en: 'Anglais', ru: 'Russe', es: 'Espagnol', pt: 'Portugais', pl: 'Polonais', tr: 'Turc', ro: 'Roumain', de: 'Allemand', it: 'Italien', nl: 'Néerlandais' };
+      const SOURCES = { direct: 'Lien direct ou inconnu', site: 'Site sergebelmont.com', autre: 'Autre site', facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube', google: 'Google', whatsapp: 'WhatsApp', submithub: 'SubmitHub', spotify: 'Spotify', x: 'X (Twitter)' };
       const DEVICES = { mobile: 'Téléphone', tablet: 'Tablette', desktop: 'Ordinateur' };
       let password = '';
       try { password = sessionStorage.getItem(STORE) || ''; } catch {}
@@ -424,7 +425,7 @@
           : '<tbody><tr><td class="empty">Pas encore de données.</td></tr></tbody>';
 
         hbars($('furthest'), d.furthest.map((x) => ({ key: x.level, value: x.visitors })), (k) => `Niveau ${k}`);
-        hbars($('src'), d.by_src.map((x) => ({ key: x.key, value: x.visitors })));
+        hbars($('src'), d.by_src.map((x) => ({ key: x.key, value: x.visitors })), (k) => SOURCES[k] || k);
         hbars($('lang'), d.by_lang.map((x) => ({ key: x.key, value: x.visitors })), (k) => LANGS[k] || k);
         hbars($('device'), d.by_device.map((x) => ({ key: x.key, value: x.visitors })), (k) => DEVICES[k] || k);
         const f = d.features;
