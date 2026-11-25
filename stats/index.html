@@ -238,6 +238,51 @@
         font-family: var(--serif);
         font-size: 17px;
       }
+      .views {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 16px;
+        padding: 0;
+        border: 0;
+      }
+      .views legend {
+        width: 100%;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .views label {
+        cursor: pointer;
+      }
+      .views input {
+        position: absolute;
+        opacity: 0;
+      }
+      .views span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 22px;
+        border: 2px solid var(--line);
+        font-weight: 700;
+        background: var(--card);
+      }
+      .views input:checked + span {
+        background: var(--wine);
+        border-color: var(--wine);
+        color: #fff6e6;
+      }
+      .views input:focus-visible + span {
+        outline: 3px solid var(--gold);
+        outline-offset: 2px;
+      }
+      .view-note {
+        margin: -4px 0 14px;
+        color: var(--muted);
+        font-size: 15px;
+      }
       .hidden {
         display: none !important;
       }
@@ -256,6 +301,13 @@
       </form>
 
       <section id="dash" class="hidden" aria-live="polite">
+        <fieldset class="views">
+          <legend>Afficher</legend>
+          <label><input type="radio" name="view" value="all" checked /> <span>Les deux jeux</span></label>
+          <label><input type="radio" name="view" value="bubble" /> <span>Bubble Nostalgia</span></label>
+          <label><input type="radio" name="view" value="mf" /> <span>Les Mots Fléchés</span></label>
+        </fieldset>
+
         <div class="bar-top">
           <label>Période
             <select id="period">
@@ -271,6 +323,7 @@
           </span>
         </div>
 
+        <p id="view-note" class="view-note"></p>
         <div id="tiles" class="tiles"></div>
 
         <div class="card">
@@ -280,17 +333,34 @@
           <div id="day-axis" class="day-axis"></div>
         </div>
 
-        <div class="card">
-          <h2>Les niveaux</h2>
-          <p class="hint">Joueurs, victoires et abandons par niveau, sur la période.</p>
-          <div class="scroll"><table id="levels"></table></div>
+        <div id="card-games" class="card">
+          <h2>Visiteurs par jeu</h2>
+          <p class="hint">Une personne qui a joué aux deux jeux compte dans chacun.</p>
+          <div id="games" class="hbars"></div>
+        </div>
+
+        <div id="card-bubble" class="card">
+          <h2>Bubble Nostalgia : les niveaux</h2>
+          <p class="hint">Joueurs, victoires, défaites et abandons par niveau, sur la période.</p>
+          <div class="scroll"><table id="levels-bubble"></table></div>
+        </div>
+
+        <div id="card-mf" class="card">
+          <h2>Les Mots Fléchés : les grilles</h2>
+          <p class="hint">Joueurs, grilles terminées et abandonnées, sur la période.</p>
+          <div class="scroll"><table id="levels-mf"></table></div>
         </div>
 
         <div class="grid2">
-          <div class="card">
-            <h2>Où les joueurs s’arrêtent</h2>
-            <p class="hint">Dernier niveau gagné par chaque visiteur (0 = aucun niveau gagné).</p>
-            <div id="furthest" class="hbars"></div>
+          <div id="card-far-bubble" class="card">
+            <h2>Bubble : où les joueurs s’arrêtent</h2>
+            <p class="hint">Dernier niveau gagné par chaque visiteur (0 = aucun).</p>
+            <div id="far-bubble" class="hbars"></div>
+          </div>
+          <div id="card-far-mf" class="card">
+            <h2>Mots Fléchés : où les joueurs s’arrêtent</h2>
+            <p class="hint">Dernière grille du parcours terminée (0 = aucune).</p>
+            <div id="far-mf" class="hbars"></div>
           </div>
           <div class="card">
             <h2>D’où ils viennent</h2>
@@ -299,6 +369,7 @@
           </div>
           <div class="card">
             <h2>Langues</h2>
+            <p class="hint">Les Mots Fléchés n’existe qu’en français.</p>
             <div id="lang" class="hbars"></div>
           </div>
           <div class="card">
@@ -316,20 +387,32 @@
     <div id="tip" class="tip hidden" role="tooltip"></div>
 
     <script>
-      // Adresse et clé PUBLIQUE du projet (la même que dans le jeu) : les
+      // Adresse et clé PUBLIQUE du projet (la même que dans les jeux) : les
       // données ne sont lisibles qu'avec le mot de passe, vérifié par le serveur.
       const URL_BASE = 'https://xfvyujzzrubpqzrimots.supabase.co';
       const KEY = 'sb_publishable_0__DCATjWu45u9UGz6VG4g_ZvEUW_uF';
       const STORE = 'bn-stats-pw';
+      const VIEW_STORE = 'bn-stats-view';
       const $ = (id) => document.getElementById(id);
       const nf = new Intl.NumberFormat('fr-FR');
       const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
       const LANGS = { fr: 'Français', en: 'Anglais', ru: 'Russe', es: 'Espagnol', pt: 'Portugais', pl: 'Polonais', tr: 'Turc', ro: 'Roumain', de: 'Allemand', it: 'Italien', nl: 'Néerlandais' };
-      const SOURCES = { direct: 'Lien direct ou inconnu', site: 'Site sergebelmont.com', autre: 'Autre site', facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube', google: 'Google', whatsapp: 'WhatsApp', submithub: 'SubmitHub', spotify: 'Spotify', x: 'X (Twitter)' };
       const DEVICES = { mobile: 'Téléphone', tablet: 'Tablette', desktop: 'Ordinateur' };
+      const SOURCES = { direct: 'Lien direct ou inconnu', site: 'Site sergebelmont.com', autre: 'Autre site', facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube', google: 'Google', whatsapp: 'WhatsApp', submithub: 'SubmitHub', spotify: 'Spotify', x: 'X (Twitter)' };
+      const GAMES = { bubble: 'Bubble Nostalgia', mf: 'Les Mots Fléchés' };
+      const NOTES = {
+        all: 'Vue d’ensemble : un visiteur qui a joué aux deux jeux n’est compté qu’une fois.',
+        bubble: 'Bubble Nostalgia uniquement.',
+        mf: 'Les Mots Fléchés uniquement.',
+      };
       let password = '';
       try { password = sessionStorage.getItem(STORE) || ''; } catch {}
+      try {
+        const v = localStorage.getItem(VIEW_STORE);
+        if (v) document.querySelector(`input[name="view"][value="${v}"]`).checked = true;
+      } catch {}
 
+      const view = () => document.querySelector('input[name="view"]:checked').value;
       const duration = (s) => {
         s = Math.round(s || 0);
         if (s < 60) return `${s} s`;
@@ -337,15 +420,18 @@
         return m < 60 ? `${m} min ${String(s % 60).padStart(2, '0')}` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`;
       };
       const pct = (a, b) => (b ? `${Math.round((100 * a) / b)} %` : '–');
+      const mfName = (n) => (n === 0 ? 'Défi du jour' : n > 100 ? `Serge Belmont ${n - 100}` : `Grille ${n}`);
+      const show = (id, on) => $(id).classList.toggle('hidden', !on);
 
       async function load() {
         $('msg').textContent = '';
         let res;
+        const v = view();
         try {
           res = await fetch(`${URL_BASE}/rest/v1/rpc/get_stats`, {
             method: 'POST',
             headers: { apikey: KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_password: password, p_days: Number($('period').value) }),
+            body: JSON.stringify({ p_password: password, p_days: Number($('period').value), p_game: v === 'all' ? null : v }),
           });
         } catch {
           $('msg').textContent = 'Connexion impossible. Vérifiez votre réseau.';
@@ -357,7 +443,7 @@
           showLogin();
           return;
         }
-        render(await res.json());
+        render(await res.json(), v);
         try { sessionStorage.setItem(STORE, password); } catch {}
         $('login').classList.add('hidden');
         $('dash').classList.remove('hidden');
@@ -383,20 +469,28 @@
           .join('');
       }
 
-      function render(d) {
+      function table(el, head, rows) {
+        el.innerHTML = rows.length
+          ? `<thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`
+          : '<tbody><tr><td class="empty">Pas encore de données.</td></tr></tbody>';
+      }
+
+      function render(d, v) {
+        $('view-note').textContent = NOTES[v];
         const t = d.totals;
         const r = d.retention;
+        const played = v === 'mf' ? 'grilles commencées' : v === 'bubble' ? 'niveaux lancés' : 'parties lancées';
         const tiles = [
           [nf.format(t.visitors), 'visiteurs'],
           [nf.format(t.new_visitors), 'nouveaux visiteurs'],
           [nf.format(t.sessions), 'visites'],
           [duration(t.avg_session_seconds), 'temps moyen par visite'],
           [`${nf.format(t.total_play_hours)} h`, 'temps de jeu total'],
-          [nf.format(t.levels_played), 'niveaux lancés'],
+          [nf.format(t.levels_played), played],
           [pct(r.d1, r.cohort_d1_eligible), `revenus le lendemain (${r.d1}/${r.cohort_d1_eligible})`],
           [pct(r.d7, r.cohort_d7_eligible), `revenus dans les 7 jours (${r.d7}/${r.cohort_d7_eligible})`],
         ];
-        $('tiles').innerHTML = tiles.map(([v, l]) => `<div class="tile"><b>${v}</b><span>${esc(l)}</span></div>`).join('');
+        $('tiles').innerHTML = tiles.map(([val, l]) => `<div class="tile"><b>${val}</b><span>${esc(l)}</span></div>`).join('');
 
         // Visiteurs par jour
         const days = d.daily;
@@ -412,19 +506,32 @@
         const fmtDay = (s) => new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         $('day-axis').innerHTML = days.length ? `<span>${fmtDay(days[0].day)}</span><span>${fmtDay(days[days.length - 1].day)}</span>` : '';
 
-        // Niveaux
-        const lv = d.levels;
-        $('levels').innerHTML = lv.length
-          ? `<thead><tr><th>Niveau</th><th>Joueurs</th><th>Parties</th><th>Gagnées</th><th>Perdues</th><th>Abandons</th><th>Durée moy.</th><th>% atteint si échec</th></tr></thead><tbody>` +
-            lv
-              .map(
-                (l) => `<tr><td>${l.level}</td><td>${l.players}</td><td>${l.started}</td><td>${l.won} (${pct(l.won, l.started)})</td><td>${l.lost}</td><td>${l.quit}</td><td>${duration(l.avg_seconds)}</td><td>${l.avg_percent_failed == null ? '–' : l.avg_percent_failed + ' %'}</td></tr>`,
-              )
-              .join('') +
-            '</tbody>'
-          : '<tbody><tr><td class="empty">Pas encore de données.</td></tr></tbody>';
+        // Par jeu (vue d'ensemble seulement)
+        show('card-games', v === 'all');
+        hbars($('games'), d.by_game.map((x) => ({ key: x.key, value: x.visitors })), (k) => GAMES[k] || k);
 
-        hbars($('furthest'), d.furthest.map((x) => ({ key: x.level, value: x.visitors })), (k) => `Niveau ${k}`);
+        // Niveaux et grilles
+        const lb = d.levels.filter((l) => l.game === 'bubble');
+        const lm = d.levels.filter((l) => l.game === 'mf').sort((a, b) => (a.level === 0) - (b.level === 0) || a.level - b.level);
+        show('card-bubble', v !== 'mf');
+        show('card-mf', v !== 'bubble');
+        table(
+          $('levels-bubble'),
+          ['Niveau', 'Joueurs', 'Parties', 'Gagnées', 'Perdues', 'Abandons', 'Durée moy.', '% atteint si échec'],
+          lb.map((l) => [l.level, l.players, l.started, `${l.won} (${pct(l.won, l.started)})`, l.lost, l.quit, duration(l.avg_seconds), l.avg_percent_failed == null ? '–' : l.avg_percent_failed + ' %']),
+        );
+        table(
+          $('levels-mf'),
+          ['Grille', 'Joueurs', 'Commencées', 'Terminées', 'Abandons', 'Durée moy.', 'Indices moy.'],
+          lm.map((l) => [esc(mfName(l.level)), l.players, l.started, `${l.won} (${pct(l.won, l.started)})`, l.quit, duration(l.avg_seconds), l.avg_hints == null ? '–' : String(l.avg_hints).replace('.', ',')]),
+        );
+
+        show('card-far-bubble', v !== 'mf');
+        show('card-far-mf', v !== 'bubble');
+        const far = (g) => d.furthest.filter((x) => x.game === g).map((x) => ({ key: x.level, value: x.visitors }));
+        hbars($('far-bubble'), far('bubble'), (k) => `Niveau ${k}`);
+        hbars($('far-mf'), far('mf'), (k) => `Grille ${k}`);
+
         hbars($('src'), d.by_src.map((x) => ({ key: x.key, value: x.visitors })), (k) => SOURCES[k] || k);
         hbars($('lang'), d.by_lang.map((x) => ({ key: x.key, value: x.visitors })), (k) => LANGS[k] || k);
         hbars($('device'), d.by_device.map((x) => ({ key: x.key, value: x.visitors })), (k) => DEVICES[k] || k);
@@ -433,11 +540,13 @@
           $('features'),
           [
             { key: 'Collection ouverte', value: f.collection },
-            { key: 'Photos agrandies', value: f.photo },
-            { key: 'Comment jouer', value: f.guide },
+            { key: 'Photos agrandies (Bubble)', value: f.photo },
+            { key: 'Comment jouer (Bubble)', value: f.guide },
+            { key: 'Univers Serge Belmont (Mots Fléchés)', value: f.univers },
+            { key: 'Statistiques ouvertes (Mots Fléchés)', value: f.stats },
             { key: 'Classement ouvert', value: f.board },
             { key: 'Pseudo choisi', value: f.pseudo },
-            { key: 'Langue changée', value: f.lang_change },
+            { key: 'Langue changée (Bubble)', value: f.lang_change },
           ].filter((x) => x.value > 0),
         );
       }
@@ -468,6 +577,12 @@
         password = $('pw').value;
         load();
       });
+      document.querySelectorAll('input[name="view"]').forEach((i) =>
+        i.addEventListener('change', () => {
+          try { localStorage.setItem(VIEW_STORE, view()); } catch {}
+          load();
+        }),
+      );
       $('period').addEventListener('change', load);
       $('refresh').addEventListener('click', load);
       $('logout').addEventListener('click', () => {
